@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat IA</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f9ff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+    #chat {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .message {
+      max-width: 80%;
+      padding: 0.75rem;
+      border-radius: 1rem;
+    }
+    .user {
+      align-self: flex-end;
+      background: #3b82f6;
+      color: white;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #e5e7eb;
+      color: #111827;
+    }
+    form {
+      display: flex;
+      padding: 0.5rem;
+      background: white;
+      border-top: 1px solid #ddd;
+    }
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.75rem;
+    }
+    button {
+      margin-left: 0.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border-radius: 0.75rem;
+    }
+    footer {
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      background: #f9fafb;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <header>Chat IA</header>
+  <div id="chat"></div>
+  <form id="form">
+    <input type="text" id="input" placeholder="Escribe tu mensaje..." required />
+    <button type="submit">Enviar</button>
+  </form>
+  <footer>Creado por Rigoberto Avalos</footer>
+
+  <script>
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const chat = document.getElementById('chat');
+
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function getAIResponse(message) {
+      const apiKey = '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'; // Pega tu clave API aquí
+
+      try {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: message }],
+          }),
+        });
+
+        const data = await res.json();
+        return data.choices[0]?.message?.content || "Lo siento, no pude responder.";
+      } catch (error) {
+        return "Hubo un error de red o configuración.";
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+      addMessage(message, 'user');
+      input.value = '';
+      const response = await getAIResponse(message);
+      addMessage(response, 'bot');
+    });
+  </script>
+</body>
+</html>
